@@ -1,0 +1,37 @@
+server:
+  port: 8084
+spring:
+  application:
+    name: ticket-service
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092,localhost:9094
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      group-id: order-created-event
+      properties:
+        spring.json.trusted.packages: "*"
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      artistService:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowType: COUNT_BASED
+  retry:
+    instances:
+      artistService:
+        maxAttempts: 3
+        waitDuration: 5000
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
